@@ -17,7 +17,7 @@ if(cl.error)throw new Error(cl.error.message);
 const data=JSON.parse(cl.content[0].text.replace(/```json|```/g,'').trim());
 let tid=null;const ns=data.numero_serie;
 if(ns){const f=await g('app.oilssense.com','/api/apps/'+APP+'/entities/Transformer?numero_serie='+encodeURIComponent(ns)+'&limit=1',UT);const a=Array.isArray(f)?f:(f.results||[]);if(a[0]&&a[0].id){tid=a[0].id;}else{const cr=await po('app.oilssense.com','/api/apps/'+APP+'/entities/Transformer',UT,{numero_serie:ns,identificacao:data.identificacao||ns,subscription_id:SI});tid=cr.b&&cr.b.id;}}
-const sv=await po('app.oilssense.com','/api/apps/'+APP+'/entities/LabAnalysis',UT,{h2:data.h2,ch4:data.ch4,c2h2:data.c2h2,c2h4:data.c2h4,c2h6:data.c2h6,co:data.co,co2:data.co2,furfural:data.furfural,data_coleta:data.data_coleta,laboratorio:data.laboratorio,numero_laudo:data.numero_laudo,transformer_id:tid,subscription_id:SI,tipo_oleo:oil_type||"Mineral"});
+const sv=await po('app.oilssense.com','/api/apps/'+APP+'/entities/LabAnalysis',UT,{h2:data.h2,ch4:data.ch4,c2h2:data.c2h2,c2h4:data.c2h4,c2h6:data.c2h6,co:data.co,co2:data.co2,furfural:data.furfural,data_coleta:data.data_coleta,laboratorio:data.laboratorio,numero_laudo:data.numero_laudo,transformer_id:tid,subscription_id:SI,oil_type:oil_type||"Mineral"});
 if(sv.b&&sv.b.message&&!sv.b.id)throw new Error(sv.b.message);
 return{statusCode:200,headers:cors,body:JSON.stringify({success:true,data,id:sv.b&&sv.b.id})};
 }catch(e){return{statusCode:500,headers:cors,body:JSON.stringify({error:e.message||'Erro interno'})};}
