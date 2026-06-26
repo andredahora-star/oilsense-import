@@ -22,3 +22,4 @@ if(sv.b&&sv.b.message&&!sv.b.id)throw new Error(sv.b.message);
 return{statusCode:200,headers:cors,body:JSON.stringify({success:true,data,id:sv.b&&sv.b.id})};
 }catch(e){return{statusCode:500,headers:cors,body:JSON.stringify({error:e.message||'Erro interno'})};}
 };
+// rebuild 1782447236692
