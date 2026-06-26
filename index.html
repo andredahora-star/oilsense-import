@@ -1,1 +1,115 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>OilSense - Importar Laudos</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;padding:32px 24px}.wrap{max-width:900px;margin:0 auto}h1{font-size:24px;font-weight:700;margin-bottom:6px;margin-top:10px}.sub{color:#8b949e;font-size:14px;margin-bottom:20px}.steps{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#8b949e;line-height:1.8}.steps b{color:#e6edf3}.zone{border:2px dashed #30363d;border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;background:#161b22;margin-bottom:20px;transition:all .2s}.zone:hover,.zone.drag{border-color:#22c55e;background:#0f1f0f}.zone h2{font-size:16px;font-weight:500;margin-top:10px;margin-bottom:6px}.zone p{color:#8b949e;font-size:13px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}.stat{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px}.sv{font-size:26px;font-weight:700}.sl{font-size:12px;color:#8b949e;margin-top:4px}.queue{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px 16px}.ch{display:flex;align-items:center;gap:12px}.ci{flex:1;min-width:0}.cn{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cs{font-size:12px;color:#8b949e;margin-top:3px}.badge{font-size:12px;padding:4px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}.ok{background:#0f1f0f;border:1px solid #22c55e44;border-radius:12px;padding:28px;text-align:center;margin-top:10px}.ok-title{font-size:20px;font-weight:700;color:#22c55e;margin-bottom:6px}.ok-sub{font-size:13px;color:#8b949e;margin-bottom:20px}.btngo{padding:12px 28px;border-radius:8px;border:none;background:#22c55e;color:#0d1117;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}</style></head><body><div class="wrap"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0d1117">OS</div><span style="font-size:18px;font-weight:600">OilSense</span></div><h1>Importar Laudos em Lote</h1><p class="sub">Selecione os PDFs dos laudos laboratoriais. A IA extrai os dados e salva automaticamente na sua conta OilSense.</p><div class="steps"><b>Como funciona:</b> 1. Selecione os PDFs &rarr; 2. A IA extrai automaticamente &rarr; 3. Salvo no OilSense &rarr; 4. Engine IA processa</div><div class="zone" id="zone" onclick="document.getElementById('fi').click()"><div style="font-size:42px">&#128196;</div><h2>Arraste os PDFs aqui ou clique para selecionar</h2><p>Ate 20 arquivos PDF por vez</p></div><input type="file" id="fi" accept=".pdf" multiple style="display:none"><div class="summary" id="sum" style="display:none"><div class="stat"><div class="sv" id="st">0</div><div class="sl">PDFs</div></div><div class="stat"><div class="sv" id="sp" style="color:#9b59b6">0</div><div class="sl">Processando</div></div><div class="stat"><div class="sv" id="ss" style="color:#22c55e">0</div><div class="sl">Salvos</div></div></div><div class="queue" id="queue"></div><div class="ok" id="ok" style="display:none"><div style="font-size:40px;margin-bottom:12px">&#10003;</div><div class="ok-title" id="ott"></div><div class="ok-sub">As analises estao no OilSense e serao processadas pelo Engine IA.</div><button class="btngo" onclick="window.open('https://app.oilssense.com/lab-analyses','_blank')">Ver analises no OilSense &rarr;</button></div></div><script>var items=[],SC={P:'p',V:'v',X:'x'},SL={p:'Processando...',v:'Salvo!',x:'Erro'},SK={p:'#9b59b6',v:'#22c55e',x:'#e74c3c'};function upd(){var t=items.length,p=0,v=0;items.forEach(function(i){if(i.s===SC.P)p++;else if(i.s===SC.V)v++;});document.getElementById('st').textContent=t;document.getElementById('sp').textContent=p;document.getElementById('ss').textContent=v;document.getElementById('sum').style.display=t>0?'grid':'none';if(t>0&&p===0&&v>0){document.getElementById('ok').style.display='block';document.getElementById('ott').textContent=v+' analise'+(v!==1?'s':'')+' importada'+(v!==1?'s':'')+' com sucesso!';}}function badge(i,st,sub){var b=document.getElementById('b'+i);if(b){b.textContent=SL[st];b.style.background=SK[st]+'22';b.style.color=SK[st];b.style.border='1px solid '+SK[st]+'44';}if(sub){var s=document.getElementById('s'+i);if(s)s.textContent=sub;}items[i].s=st;upd();}function mkCard(it,i){return '<div class="card"><div class="ch"><div style="font-size:22px;flex-shrink:0">&#128203;</div><div class="ci"><div class="cn">'+it.n+'</div><div class="cs" id="s'+i+'">Aguardando...</div></div><div class="badge" id="b'+i+'" style="background:'+SK[SC.P]+'22;color:'+SK[SC.P]+';border:1px solid '+SK[SC.P]+'44">'+SL[SC.P]+'</div></div></div>';}async function processFiles(files){document.getElementById('ok').style.display='none';var pdfs=Array.from(files).filter(function(f){return f.name.toLowerCase().endsWith('.pdf');});if(!pdfs.length)return;var start=items.length;pdfs.forEach(function(f){items.push({n:f.name,f:f,s:SC.P});});document.getElementById('queue').innerHTML=items.map(function(it,i){return mkCard(it,i);}).join('');upd();for(var i=start;i<items.length;i++){try{var b64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(items[i].f);});var resp=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pdf_base64:b64})});var txt=await resp.text();if(!txt||!txt.trim())throw new Error('Servidor sem resposta');var d=JSON.parse(txt);if(!d.success)throw new Error(d.error||'Erro');badge(i,SC.V,(d.data&&d.data.identificacao)||(d.data&&d.data.numero_serie)||'Salvo');}catch(e){badge(i,SC.X,e.message?e.message.slice(0,80):'Erro');}}}var zone=document.getElementById('zone'),fi=document.getElementById('fi');fi.addEventListener('change',function(e){if(e.target.files&&e.target.files.length)processFiles(e.target.files);});zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('drag');});zone.addEventListener('dragleave',function(){zone.classList.remove('drag');});zone.addEventListener('drop',function(e){e.preventDefault();zone.classList.remove('drag');processFiles(e.dataTransfer.files);});</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OilSense - Importar Laudos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;padding:32px 24px}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:24px;font-weight:700;margin-bottom:6px;margin-top:10px}
+.sub{color:#8b949e;font-size:14px;margin-bottom:20px;line-height:1.5}
+.steps{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#8b949e;line-height:1.8}
+.steps b{color:#e6edf3}
+.oil-select-box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.oil-select-box label{font-size:14px;font-weight:600;color:#e6edf3;white-space:nowrap}
+.oil-select-box select{background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:14px;padding:8px 14px;cursor:pointer;outline:none;font-family:inherit;flex:1;min-width:200px}
+.oil-select-box select:focus{border-color:#22c55e}
+.zone{border:2px dashed #30363d;border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;background:#161b22;margin-bottom:20px;transition:all .2s}
+.zone:hover,.zone.drag{border-color:#22c55e;background:#0f1f0f}
+.zone h2{font-size:16px;font-weight:500;margin-top:10px;margin-bottom:6px}
+.zone p{color:#8b949e;font-size:13px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px}
+.sv{font-size:26px;font-weight:700}.sl{font-size:12px;color:#8b949e;margin-top:4px}
+.queue{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:14px 16px}
+.ch{display:flex;align-items:center;gap:12px}
+.ci{flex:1;min-width:0}
+.cn{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs{font-size:12px;color:#8b949e;margin-top:3px}
+.badge{font-size:12px;padding:4px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.ok{background:#0f1f0f;border:1px solid #22c55e44;border-radius:12px;padding:28px;text-align:center;margin-top:10px}
+.ok-title{font-size:20px;font-weight:700;color:#22c55e;margin-bottom:6px}
+.ok-sub{font-size:13px;color:#8b949e;margin-bottom:20px}
+.btngo{padding:12px 28px;border-radius:8px;border:none;background:#22c55e;color:#0d1117;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="width:36px;height:36px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0d1117">OS</div>
+    <span style="font-size:18px;font-weight:600">OilSense</span>
+  </div>
+  <h1>Importar Laudos em Lote</h1>
+  <p class="sub">Selecione os PDFs dos laudos laboratoriais. A IA extrai os dados e salva automaticamente na sua conta OilSense.</p>
+
+  <div class="steps"><b>Como funciona:</b> 1. Selecione o tipo de oleo &rarr; 2. Selecione os PDFs &rarr; 3. A IA extrai e salva no OilSense &rarr; 4. Engine IA processa</div>
+
+  <div class="oil-select-box">
+    <label>&#128737; Tipo de oleo:</label>
+    <select id="oilType">
+      <option value="Mineral">Mineral</option>
+      <option value="Vegetal">Vegetal (Esteres Naturais)</option>
+      <option value="Sintetico">Sintetico (Esteres Sinteticos)</option>
+      <option value="Siliconado">Siliconado</option>
+      <option value="Alta Temperatura">Alta Temperatura</option>
+    </select>
+  </div>
+
+  <div class="zone" id="zone" onclick="document.getElementById('fi').click()">
+    <div style="font-size:42px">&#128196;</div>
+    <h2>Arraste os PDFs aqui ou clique para selecionar</h2>
+    <p>Ate 20 arquivos PDF por vez</p>
+  </div>
+  <input type="file" id="fi" accept=".pdf" multiple style="display:none">
+
+  <div class="summary" id="sum" style="display:none">
+    <div class="stat"><div class="sv" id="st">0</div><div class="sl">PDFs</div></div>
+    <div class="stat"><div class="sv" id="sp" style="color:#9b59b6">0</div><div class="sl">Processando</div></div>
+    <div class="stat"><div class="sv" id="ss" style="color:#22c55e">0</div><div class="sl">Salvos</div></div>
+  </div>
+  <div class="queue" id="queue"></div>
+  <div class="ok" id="ok" style="display:none">
+    <div style="font-size:40px;margin-bottom:12px">&#10003;</div>
+    <div class="ok-title" id="ott"></div>
+    <div class="ok-sub">As analises estao no OilSense e serao processadas pelo Engine IA automaticamente.</div>
+    <button class="btngo" onclick="window.open('https://app.oilssense.com/lab-analyses','_blank')">Ver analises no OilSense &rarr;</button>
+  </div>
+</div>
+
+<script>
+var items=[],SC={P:'p',V:'v',X:'x'},SL={p:'Processando...',v:'Salvo!',x:'Erro'},SK={p:'#9b59b6',v:'#22c55e',x:'#e74c3c'};
+function upd(){var t=items.length,p=0,v=0;items.forEach(function(i){if(i.s===SC.P)p++;else if(i.s===SC.V)v++;});document.getElementById('st').textContent=t;document.getElementById('sp').textContent=p;document.getElementById('ss').textContent=v;document.getElementById('sum').style.display=t>0?'grid':'none';if(t>0&&p===0&&v>0){document.getElementById('ok').style.display='block';document.getElementById('ott').textContent=v+' analise'+(v!==1?'s':'')+' importada'+(v!==1?'s':'')+' com sucesso!';}}
+function badge(i,st,sub){var b=document.getElementById('b'+i);if(b){b.textContent=SL[st];b.style.background=SK[st]+'22';b.style.color=SK[st];b.style.border='1px solid '+SK[st]+'44';}if(sub){var s=document.getElementById('s'+i);if(s)s.textContent=sub;}items[i].s=st;upd();}
+function mkCard(it,i){return '<div class="card"><div class="ch"><div style="font-size:22px;flex-shrink:0">&#128203;</div><div class="ci"><div class="cn">'+it.n+'</div><div class="cs" id="s'+i+'">Aguardando...</div></div><div class="badge" id="b'+i+'" style="background:'+SK[SC.P]+'22;color:'+SK[SC.P]+';border:1px solid '+SK[SC.P]+'44">'+SL[SC.P]+'</div></div></div>';}
+async function processFiles(files){
+  document.getElementById('ok').style.display='none';
+  var oilType = document.getElementById('oilType').value;
+  var pdfs=Array.from(files).filter(function(f){return f.name.toLowerCase().endsWith('.pdf');});
+  if(!pdfs.length)return;
+  var start=items.length;
+  pdfs.forEach(function(f){items.push({n:f.name,f:f,s:SC.P});});
+  document.getElementById('queue').innerHTML=items.map(function(it,i){return mkCard(it,i);}).join('');
+  upd();
+  for(var i=start;i<items.length;i++){
+    try{
+      var b64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(items[i].f);});
+      var resp=await fetch('/.netlify/functions/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pdf_base64:b64,oil_type:oilType})});
+      var txt=await resp.text();
+      if(!txt||!txt.trim())throw new Error('Servidor sem resposta');
+      var d=JSON.parse(txt);
+      if(!d.success)throw new Error(d.error||'Erro ao salvar');
+      badge(i,SC.V,(d.data&&d.data.identificacao)||(d.data&&d.data.numero_serie)||'Salvo');
+    }catch(e){badge(i,SC.X,e.message?e.message.slice(0,80):'Erro');}
+  }
+}
+var zone=document.getElementById('zone'),fi=document.getElementById('fi');
+fi.addEventListener('change',function(e){if(e.target.files&&e.target.files.length)processFiles(e.target.files);});
+zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('drag');});
+zone.addEventListener('dragleave',function(){zone.classList.remove('drag');});
+zone.addEventListener('drop',function(e){e.preventDefault();zone.classList.remove('drag');processFiles(e.dataTransfer.files);});
+</script>
+</body>
+</html>
