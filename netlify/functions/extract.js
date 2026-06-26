@@ -35,9 +35,12 @@ exports.handler = async (ev) => {
     const { pdf_base64, filename } = JSON.parse(ev.body || '{}');
     if (!pdf_base64) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'pdf_base64 required' }) };
 
+    // Remover prefixo data URL se presente (ex: data:application/pdf;base64,...)
+    const cleanBase64 = pdf_base64.includes(',') ? pdf_base64.split(',')[1] : pdf_base64;
+
     const rb = JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: [
-        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: pdf_base64 } },
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: cleanBase64 } },
         { type: 'text', text: 'Extraia todos os dados deste laudo e retorne o JSON. Nao inclua texto alem do JSON.' }
       ]}]
     });
